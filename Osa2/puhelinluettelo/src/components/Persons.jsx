@@ -1,9 +1,9 @@
-const Persons = ({newFilter, persons}) => {
-    const personsToShow = persons.filter(person=>person.name.toLocaleLowerCase().includes(newFilter))
+const Persons = ({newFilter, persons, handleDelete}) => {
+    const personsToShow = persons.filter((person)=>person.name.toLocaleLowerCase().includes(newFilter))
     return (
     <ul>
     {personsToShow.map(person => 
-      <li key={person.name}>{person.name} {person.number}</li>
+      <li key={person.name}>{person.name} {person.number}<button onClick={() => handleDelete(person.id)}>Delete</button></li>
     )}
   </ul>
     )
