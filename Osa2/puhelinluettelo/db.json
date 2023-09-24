@@ -2,7 +2,7 @@
   "persons": [
     {
       "name": "Arto Hellas",
-      "number": "4699",
+      "number": "1234",
       "id": 1
     },
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "Dan Abramov",
-      "number": "69",
+      "number": "56",
       "id": 3
     },
     {

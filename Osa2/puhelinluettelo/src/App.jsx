@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import Filter from './components/Filter'
 import PersonForm from './components/Personform'
 import Persons from './components/Persons'
 import PersonService from './services/PersonService'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -31,19 +34,28 @@ const App = () => {
     else if(findPerson && findPerson.number !== newNumber) {
       if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
       const changedPerson = {...findPerson, number: newNumber }
+
       PersonService
         .update(findPerson.id, changedPerson).then(response=>{
           setPersons(persons.map(person => person.id !== findPerson.id ? person : response))
+          setSuccessMessage(`Updated ${changedPerson.name}'s number`);
+          setTimeout(() => {
+          setSuccessMessage(null);
+          }, 5000);
           setNewName('')
           setNewNumber('')
       })
-      .catch(error=>{
-        alert(`The person '${findPerson.name}' cannot be found from the server`)
-        setPersons(note.filter(n=>n.id!==id))
+        .catch(error=>{
+          setPersons(persons.filter(person=>person.id !== findPerson.id))
+          setErrorMessage(`Information of ${findPerson.name} has already been removed from server`)
+          setTimeout(() => {
+          setErrorMessage(null)
+          }, 5000)
       })
     }
   }
 
+  // Add new person
     else {
       const personObject = {
       name: newName,
@@ -52,6 +64,10 @@ const App = () => {
 
   PersonService.create(personObject).then(response=>{
     setPersons(persons.concat(response))
+    setSuccessMessage(`Added ${response.name}`);
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 5000);
     setNewName('')
     setNewNumber('')
   })
@@ -83,6 +99,10 @@ const handleDelete = (id) => {
   if(window.confirm(`Confirm you want to delete this person`)) {
   PersonService.remove(id).then(response=>{
       setPersons(persons.filter(person=>person.id !== id))
+      setSuccessMessage(`Deleted ${persons.find((person) => person.id === id).name}`)
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
     })
 }
 }
@@ -90,6 +110,7 @@ const handleDelete = (id) => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification successMessage={successMessage} errorMessage={errorMessage}/>
       <Filter newFilter={newFilter} handleFilterChange={handleFilterChange}/>
       <h2>Add a new</h2>
       <PersonForm addPerson={addPerson} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
