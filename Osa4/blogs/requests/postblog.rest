@@ -1,0 +1,9 @@
+POST http://localhost:3001/api/blogs
+Content-Type: application/json; charset=utf-8
+
+{
+    "title": "Coinzz",
+    "author": "KOSOLA",
+    "url": "https://coinmarketcap.com/rankings/exchanges/",
+    "likes": 28
+}
