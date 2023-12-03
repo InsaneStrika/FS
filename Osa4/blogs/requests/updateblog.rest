@@ -1,9 +1,9 @@
-POST http://localhost:3001/api/blogs
+PUT http://localhost:3001/api/blogs/656ca4bde7377add98aad53b
 Content-Type: application/json
 
 {
         "title": "Coin",
         "author": "CoinGecko",
         "url": "https://www.coingecko.com/",
-        "likes": 99
+        "likes": 9999
 }
