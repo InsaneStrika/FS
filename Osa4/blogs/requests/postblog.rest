@@ -1,5 +1,6 @@
 POST http://localhost:3001/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkphYWtrbyIsImlkIjoiNjU2ZGE2OWM3MDc0ZDE5MmUxNjkzMGQzIiwiaWF0IjoxNzAxNjg4NTIxfQ.MV_3rDCHKE0ipaWQFCwLZXqi8cuP7k1_sOeAzmG0VZM
 
 {
         "title": "Coin",

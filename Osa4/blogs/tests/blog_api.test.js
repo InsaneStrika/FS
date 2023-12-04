@@ -5,13 +5,18 @@ const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const helper = require('./test_helper')
-const blog = require('../models/blog')
+const bcrypt = require('bcrypt')
 
 beforeEach(async () => {
     await Blog.deleteMany({})
     await Blog.insertMany(helper.initialBlogs)
-})
+    await User.deleteMany({})
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', name: 'Roth', passwordHash: passwordHash })
+    await user.save()
+},20000)
 
 
 test('Blogs are returned as json', async () => {
@@ -38,11 +43,14 @@ test('A blog can be added', async() => {
         "url": "https://www.coingecko.com/",
         "likes": 99
     }
-    
+    const response = await api.post('/api/login').send({username: 'root', password: 'sekret'})
+    const token = response.body.token
+
     await api
     .post('/api/blogs')
     .send(newBlog)
-    .expect(201)
+    .set('Authorization', `Bearer ${token}`)
+    .expect(200)
     .expect('Content-Type', /application\/json/)
 
   const blogsAtEnd = await helper.blogsInDb()
@@ -55,16 +63,33 @@ test('A blog can be added', async() => {
 
 })
 
+test('A blog cannot be added without token', async() => {
+    const newBlog = {
+        "title": "Coin",
+        "author": "CoinGecko",
+        "url": "https://www.coingecko.com/",
+        "likes": 99
+    }
+
+    await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(401)
+})
+
 test('A blog with no likes has zero likes', async() => {
     const newBlog = {
         "title": "FULLSTACK",
         "author": "HY",
         "url": "https://fullstackopen.com/"
     }
+    const response0 = await api.post('/api/login').send({username: 'root', password: 'sekret'})
+    const token = response0.body.token
 
     const response = await api
     .post('/api/blogs')
     .send(newBlog)
+    .set('Authorization', `Bearer ${token}`)
 
     expect(response.body.likes).toBe(0)
 })
@@ -75,8 +100,11 @@ test('A blog with no title cannot be added', async() => {
         "url": "https://fullstackopen.com/",
         "likes": 99
     }
+    const response0 = await api.post('/api/login').send({username: 'root', password: 'sekret'})
+    const token = response0.body.token
+
     await api
-    .post('/api/blogs').send(newBlog).expect(400)
+    .post('/api/blogs').send(newBlog).set('Authorization', `Bearer ${token}`).expect(400)
 })
 
 test('A blog with no url cannot be added', async() => {
@@ -85,20 +113,44 @@ test('A blog with no url cannot be added', async() => {
         "author": "HY",
         "likes": 99
     }
+    const response0 = await api.post('/api/login').send({username: 'root', password: 'sekret'})
+    const token = response0.body.token
+
     await api
-    .post('/api/blogs').send(newBlog).expect(400)
+    .post('/api/blogs').send(newBlog).set('Authorization', `Bearer ${token}`).expect(400)
 })
 
 test('A blog can be deleted', async() => {
+
+    // Adding a blog and then deleting it
+
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
+    const response0 = await api.post('/api/login').send({username: 'root', password: 'sekret'})
+    const token = response0.body.token
+
+    const newBlog = {
+        "title": "Coin",
+        "author": "CoinGecko",
+        "url": "https://www.coingecko.com/",
+        "likes": 99
+    }
+
+    const postedBlog = await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .set('Authorization', `Bearer ${token}`)
+
+    const id = postedBlog.body.id
+
     await api
-    .delete(`/api/blogs/${blogToDelete.id}`)
+    .delete(`/api/blogs/${id}`)
+    .set('Authorization', `Bearer ${token}`)
     .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length-1)
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
 test('A blog can be updated', async() => {
