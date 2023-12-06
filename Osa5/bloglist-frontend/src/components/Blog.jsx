@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
+import propTypes from 'prop-types'
 
-const Blog = ({blog, updateBlog, user, deleteBlog}) => {
+const Blog = ({ blog, updateBlog, user, deleteBlog }) => {
   const [blogVisible, setBlogVisible] = useState(false)
   const [blogOwner, setBlogOwner] = useState(false)
 
@@ -35,7 +36,7 @@ const Blog = ({blog, updateBlog, user, deleteBlog}) => {
   const removeBlog = () => {
     deleteBlog(blog)
   }
-  
+
   return (
     <div style={blogStyle}>
       <div>
@@ -49,6 +50,13 @@ const Blog = ({blog, updateBlog, user, deleteBlog}) => {
       </div>
     </div>
   )
+}
+
+Blog.propTypes = {
+  blog: propTypes.object.isRequired,
+  updateBlog: propTypes.func.isRequired,
+  user: propTypes.object.isRequired,
+  deleteBlog: propTypes.func.isRequired
 }
 
 export default Blog
